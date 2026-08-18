@@ -70,6 +70,14 @@
     it opens straight onto C++ -- so an empty header run is only an error when
     there is no mod.json to supply ==WindhawkMod== either.
 
+    Once the bundle is on disk, an optional per-mod hook gets the last word:
+
+        mods/<name>/hooks/postBuild.ps1   -ModDir <mod folder> -OutFile <bundle>
+
+    It runs with the file written and closed, and before wh-install.ps1 hands
+    that file to windhawk-cli, so it is free to rewrite the bundle and whatever
+    it leaves behind is what Windhawk compiles. See wh-hooks.ps1.
+
 .PARAMETER Mod
     A mod name (folder under mods/), a mod folder path, or any file inside one.
     Given a file, the enclosing mod folder is found by walking up to mods/.
@@ -115,6 +123,10 @@ $ErrorActionPreference = 'Stop'
 # exactly on where a block starts and ends, or extracting one would drop or
 # duplicate content the other then splices back.
 . (Join-Path $PSScriptRoot 'wh-blocks.ps1')
+
+# Optional per-mod build hooks (mods/<name>/hooks/postBuild.ps1). Dot-sourced
+# unconditionally; a mod without a hooks/ folder costs one Test-Path.
+. (Join-Path $PSScriptRoot 'wh-hooks.ps1')
 
 $Repo     = Split-Path -Parent $PSScriptRoot
 
@@ -442,5 +454,15 @@ Write-Host ("==> bundled {0} ({1} lines{2}{3}) -> {4}" -f
 
 # Remembered so a build triggered from shared/ still knows what to rebuild.
 [IO.File]::WriteAllText((Join-Path $OutDir '.last-mod'), $modName, $utf8)
+
+# The bundle is finished and every handle on it is closed, so a postBuild hook
+# may rewrite the file in place -- and this runs before wh-install.ps1 feeds it
+# to windhawk-cli, so whatever the hook leaves behind is what Windhawk compiles.
+# Invoke-WhModHook writes only to the host: nothing may reach the success stream
+# below, which callers capture as the bundle path.
+Invoke-WhModHook -ModDir $modDir -Name 'postBuild' -Parameters @{
+    ModDir  = $modDir
+    OutFile = $outFile
+}
 
 $outFile

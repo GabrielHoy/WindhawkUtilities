@@ -136,6 +136,7 @@ From an editor, open any file in the mod and press **Ctrl+Shift+B**.
 mods/<name>/mod.json        optional; becomes the ==WindhawkMod== metadata block
 mods/<name>/README.md       optional; becomes the ==WindhawkModReadme== block
 mods/<name>/settings.yaml   optional; becomes the ==WindhawkModSettings== block
+mods/<name>/hooks/          optional; postBuild.ps1, run against the generated bundle
 mods/<name>/src/            the C++: main.wh.cpp entry point + any headers beside it
 
 shared/                     header-only utilities usable by every mod
@@ -227,6 +228,51 @@ A few things worth knowing:
   block is dropped with a warning. Delete the inline one.
 - Text *between* blocks is source, not scaffolding — a licence notice sitting between
   `==/WindhawkMod==` and the readme is preserved verbatim.
+
+---
+
+## Build Hooks
+
+A mod may carry an **optional** `hooks/` folder beside its `mod.json`, holding scripts that run at defined points in its own build process.
+
+```
+mods/<name>/hooks/postBuild.ps1
+```
+
+| Hook | Runs |
+| --- | --- |
+| `postBuild.ps1` | after the bundle is written to `build/<name>.wh.cpp` and every handle on it is closed, **before** `wh-install.ps1` hands that file to `windhawk-cli` |
+
+---
+
+Each hook is passed two absolute paths as named parameters:
+
+```powershell
+# mods/my-mod/hooks/postBuild.ps1
+param(
+    [Parameter(Mandatory)][string]$ModDir,   # the mods/<name> folder that was built
+    [Parameter(Mandatory)][string]$OutFile   # the generated bundle, safe to rewrite
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# If and when you overwrite the mod's outputted source, try to use UTF-8 with no BOM, CRLF.
+# (Add-Content would encode using the console's code page and mangle emoji commonly in readme block.)
+[IO.File]::AppendAllText($OutFile, "// built $(Get-Date -f s)`r`n", [Text.UTF8Encoding]::new($false))
+```
+
+Details worth knowing:
+
+- **Non-zero exit codes fail builds.** If a hook fails, the build fails *before* `windhawk-cli` is invoked: Nothing is compiled, nothing is installed, no UAC prompt appears.
+- **Hooks run in a child `pwsh` with** `-NoProfile -NonInteractive -ExecutionPolicy Bypass`. A hook
+  gets its own strict mode, error preferences and working directory rather than inheriting the
+  bundler's, and an unsigned hook runs on a default-policy machine.
+- **Hooks run unelevated**, before any commands that require Administrator. A repo-controlled
+  script never gains admin rights from a build, even if you're utilizing this repo's daemon.
+- **All hook output goes to the host** - this is indented. Nothing a hook prints can reach the bundler's success stream (which callers would capture as the bundle path)
+- **A hook fires for every build of its mod** - with the exception of `wh-install.ps1 -NoBundle` which installs a pre-built file **without a bundling step**.
+- **Unknown files in `hooks/` cause complaints.** A `.ps1` in the `hooks/` directory - whose name is not a known hook - is warned about rather than ignored. Inspiration for this is the fact that a hook never running looks identical to one running and doing nothing.
 
 ---
 
