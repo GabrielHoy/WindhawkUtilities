@@ -4,7 +4,7 @@
  */
 #pragma once
 
-#include "MathConstants.hpp"
+#include "MathUtil.hpp"
 #include <cmath>
 #include <map>
 

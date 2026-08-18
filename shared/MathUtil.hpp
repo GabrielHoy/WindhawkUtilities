@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <type_traits>
+
 namespace Math {
 
 #pragma clang diagnostic push // unused constant variable(s)
@@ -74,6 +77,12 @@ namespace Math {
     constexpr double ONE_SIXTH  = 0.16666666666666666666;
     // In radians. Equivalent to approx. 137.5 degrees.
     constexpr double GOLDEN_ANGLE = 2.39996322972865332;
+
+    template <typename T>
+        requires std::is_arithmetic_v<T>
+    constexpr std::int8_t Sign(T value) noexcept {
+        return (value > 0) ? 1 : (value < 0) ? -1 : 0;
+    }
 
 #pragma clang diagnostic pop // unused constant variable(s)
 
