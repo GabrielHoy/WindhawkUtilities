@@ -1,0 +1,187 @@
+{
+    "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "modName",
+            "type": "promptString",
+            "description": "Mod folder name under mods/ (e.g. local@windows-animations-fork)"
+        }
+    ],
+    "tasks": [
+        {
+            "label": "Windhawk: Build current mod",
+            "detail": "Bundle the enclosing mod into build/, then compile + install it (preserves enabled/disabled state)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-install.ps1",
+                "-Path", "${file}"
+            ],
+            "group": { "kind": "build", "isDefault": true },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated",
+                "clear": true
+            },
+            "problemMatcher": {
+                "owner": "windhawk",
+                "source": "windhawk",
+                "fileLocation": "absolute",
+                "pattern": [
+                    {
+                        "regexp": "^(?:\\[compile:[^\\]]+\\]\\s+)?(.+?\\.(?:wh\\.cpp|cpp|cc|cxx|h|hpp|hxx|inc)):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(error|warning|note):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                ]
+            }
+        },
+        {
+            "label": "Windhawk: Build current mod (force enable)",
+            "detail": "Same as build, but switches the mod on afterwards",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-install.ps1",
+                "-Path", "${file}",
+                "-Enable"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": {
+                "owner": "windhawk",
+                "source": "windhawk",
+                "fileLocation": "absolute",
+                "pattern": [
+                    {
+                        "regexp": "^(?:\\[compile:[^\\]]+\\]\\s+)?(.+?\\.(?:wh\\.cpp|cpp|cc|cxx|h|hpp|hxx|inc)):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(error|warning|note):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                ]
+            }
+        },
+        {
+            "label": "Windhawk: Build mod by name",
+            "detail": "Prompt for a mod folder under mods/ and build it, whatever file is open",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-install.ps1",
+                "-Path", "${input:modName}"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": {
+                "owner": "windhawk",
+                "source": "windhawk",
+                "fileLocation": "absolute",
+                "pattern": [
+                    {
+                        "regexp": "^(?:\\[compile:[^\\]]+\\]\\s+)?(.+?\\.(?:wh\\.cpp|cpp|cc|cxx|h|hpp|hxx|inc)):(\\d+):(\\d+):\\s+(?:fatal\\s+)?(error|warning|note):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "severity": 4,
+                        "message": 5
+                    }
+                ]
+            }
+        },
+        {
+            "label": "Windhawk: Bundle current mod (no install)",
+            "detail": "Amalgamate into build/ only -- no compile, no UAC prompt. Useful to inspect the generated file.",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-amalgamate.ps1",
+                "-Mod", "${file}",
+                "-AllowFallback"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Windhawk: Extract header blocks from current mod",
+            "detail": "Move the inline ==WindhawkMod== / ==WindhawkModReadme== / ==WindhawkModSettings== blocks out of main.wh.cpp into mod.json, README.md and settings.yaml. wh-amalgamate splices them back in at build time.",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-extract-blocks.ps1",
+                "-Mod", "${file}"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Windhawk: Stop build daemon",
+            "detail": "Shut the elevated daemon down -- closes the no-prompt window until the next build",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-daemon.ps1",
+                "-Stop"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Windhawk: Build daemon status",
+            "detail": "Is a daemon up, and for how long",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/scripts/wh-daemon.ps1",
+                "-Status"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Windhawk: List installed mods",
+            "detail": "windhawk-cli mod list (read-only, no elevation)",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                ". '${workspaceFolder}/scripts/wh-windhawk.ps1'; & (Get-WhCliPath) mod list"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        },
+        {
+            "label": "Windhawk: Pull new sources from ModsSource",
+            "detail": "Import C:\\ProgramData\\Windhawk\\ModsSource\\*.wh.cpp as mods/<name>/src/main.wh.cpp. Skips mods that already exist here.",
+            "type": "shell",
+            "command": "pwsh",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                "$n=0; $s=0; Get-ChildItem 'C:/ProgramData/Windhawk/ModsSource/*.wh.cpp' | ForEach-Object { $d = Join-Path '${workspaceFolder}/mods' ($_.Name -replace '\\.wh\\.cpp$','') ; if (Test-Path -LiteralPath $d) { $s++; return } ; $src = Join-Path $d 'src' ; New-Item -ItemType Directory -Path $src -Force | Out-Null ; Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $src 'main.wh.cpp') ; Write-Host \"  + $(Split-Path -Leaf $d)\" ; $n++ } ; Write-Host \"Imported $n mod(s), skipped $s already present.\" -ForegroundColor Green"
+            ],
+            "presentation": { "reveal": "always", "panel": "dedicated", "clear": true },
+            "problemMatcher": []
+        }
+    ]
+}

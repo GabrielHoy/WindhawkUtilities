@@ -1,0 +1,124 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/GabrielHoy/WindhawkMods/schemas/WindhawkMod.schema.json",
+  "title": "Windhawk mod metadata",
+  "description": "The // ==WindhawkMod== block of a mod, as an editable file. scripts/wh-amalgamate.ps1 renders this back into // @key lines when it bundles. Field reference: https://github.com/ramensoftware/windhawk/wiki/Creating-a-new-mod",
+  "type": "object",
+  "required": ["id", "name", "description", "version", "author"],
+  "additionalProperties": {
+    "description": "A metadata field this schema does not know about. Windhawk may add fields faster than this schema is updated, so unknown keys are passed through to the generated block rather than rejected.",
+    "type": ["string", "array"],
+    "items": { "type": "string" }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to this schema. Stripped when the metadata block is generated."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9a-z-]+$",
+      "description": "Unique mod identifier. Only 0-9, a-z and hyphens.\n\nNote: a mod installed from a file is registered by Windhawk as local@<id>, so this does not need the local@ prefix that the folder name carries."
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name shown in Windhawk's mod list."
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the mod."
+    },
+    "version": {
+      "type": "string",
+      "description": "Mod version. Must increase with each newly published version — Windhawk uses it to detect updates.",
+      "examples": ["1.0", "1.2.3"]
+    },
+    "author": {
+      "type": "string",
+      "description": "The mod author name or nickname."
+    },
+    "github": {
+      "type": "string",
+      "description": "Link to the author's GitHub profile.",
+      "examples": ["https://github.com/username"]
+    },
+    "twitter": {
+      "type": "string",
+      "description": "Link to the author's Twitter profile.",
+      "examples": ["https://twitter.com/username"]
+    },
+    "homepage": {
+      "type": "string",
+      "description": "The link to the website of the mod author."
+    },
+    "donateUrl": {
+      "type": "string",
+      "description": "A web page where users can financially support or sponsor the mod author."
+    },
+    "license": {
+      "type": "string",
+      "description": "The mod's license, specifying terms for use and distribution.",
+      "examples": ["MIT", "GPL-3.0"]
+    },
+    "include": {
+      "type": "array",
+      "description": "Target executables. The mod loads into a process when its executable path matches one of these entries. Supports * and ? wildcards and environment variables.\n\nUse [\"*\"] to target every process.",
+      "items": {
+        "type": "string",
+        "examples": ["explorer.exe", "*", "%ProgramFiles%\\App\\app.exe"]
+      }
+    },
+    "exclude": {
+      "type": "array",
+      "description": "Executables to skip, using the same syntax as include. Applied after include, so it carves exceptions out of a broad pattern.",
+      "items": {
+        "type": "string",
+        "examples": ["dwm.exe", "TextInputHost.exe"]
+      }
+    },
+    "architecture": {
+      "type": "array",
+      "description": "Architectures the mod supports. Omit to target x86 and x86-64.",
+      "items": {
+        "type": "string",
+        "enum": ["x86", "x86-64", "amd64", "arm64"]
+      },
+      "uniqueItems": true
+    },
+    "compilerOptions": {
+      "type": "string",
+      "description": "Extra command line parameters passed to the compiler. Almost always the -l link flags the mod's Windows APIs need.",
+      "examples": ["-lgdi32 -lole32 -loleaut32 -lruntimeobject"]
+    },
+    "localized": {
+      "type": "object",
+      "description": "Translations, keyed by language tag. Each becomes an // @key:<tag> line — e.g. a \"zh-CN\" entry with a name produces @name:zh-CN.",
+      "propertyNames": {
+        "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]+)*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Localized display name."
+          },
+          "description": {
+            "type": "string",
+            "description": "Localized short description."
+          },
+          "author": {
+            "type": "string",
+            "description": "Localized author name."
+          }
+        }
+      },
+      "examples": [
+        {
+          "zh-CN": { "name": "任务栏 Dock 动画增强版", "description": "类似 macOS 的任务栏图标悬停动画" }
+        }
+      ]
+    }
+  }
+}

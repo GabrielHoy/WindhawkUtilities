@@ -1,0 +1,40 @@
+{
+    // Use Windhawk's own bundled clangd so IntelliSense resolves the exact
+    // MinGW sysroot and Windhawk API header that the real compilation(s) use.
+    "clangd.path": "C:\\Program Files\\Windhawk\\Compiler\\bin\\clangd.exe",
+    "clangd.arguments": [
+        "--background-index",
+        "--header-insertion=never",
+        "--clang-tidy"
+    ],
+    // Mod sources are split across headers vs. normal WH; without this VS Code calls a
+    // bare `.h` C, and clangd would apply a different language mode than the
+    // -x c++ in compile_flags.txt.
+    "files.associations": {
+        "*.wh.cpp": "cpp",
+        "*.h": "cpp",
+        // PowerShell 7's ConvertFrom-Json accepts // comments, so the bundler
+        // reads these fine; jsonc stops the editor flagging them as errors.
+        // The JSON schema still applies either way.
+        "mod.json": "jsonc"
+    },
+    // Hover docs, key completion and enum validation for the ==WindhawkMod==
+    // metadata. Each generated mod.json also carries a relative "$schema", so
+    // this is 'belt-and-braces' for files opened outside the workspace.
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/mods/*/mod.json"
+            ],
+            "url": "./schemas/WindhawkMod.schema.json"
+        }
+    ],
+    // Generated bundles duplicate every line in `mods/` and `shared/`; without this
+    // every project-wide search returns each hit twice.
+    "search.exclude": {
+        "build": true
+    },
+    "[cpp]": {
+        "editor.formatOnSave": true
+    },
+}

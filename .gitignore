@@ -1,0 +1,6 @@
+mods/**
+!mods/.gitkeep
+build/*.wh.cpp
+build/.last-mod
+build/.ipc/daemon.json
+build/.ipc/daemon.lock
