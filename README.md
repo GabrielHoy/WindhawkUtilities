@@ -69,6 +69,7 @@ verify it rather than trusting it:
 | Size | 990,208 bytes |
 | Author | Tampered Reality (the author of this repo) |
 | Purpose | Inlines quoted `#include`s into one file, emitting `#line` directives |
+| Source Code | [cpp-bundler](https://github.com/GabrielHoy/cpp-bundler) |
 
 It is looked up in this order, so you are free to put it elsewhere:
 
