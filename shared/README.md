@@ -107,8 +107,8 @@ $env:WINDHAWK_HOME = 'D:\Apps\Windhawk'
 ## Quick start
 
 ```powershell
-git clone https://github.com/GabrielHoy/WindhawkMods.git
-cd WindhawkMods
+git clone https://github.com/GabrielHoy/WindhawkUtilities.git
+cd WindhawkUtilities
 
 # 1. Make a mod folder
 New-Item -ItemType Directory mods\my-mod\src -Force

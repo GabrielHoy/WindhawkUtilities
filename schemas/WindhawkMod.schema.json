@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/GabrielHoy/WindhawkMods/schemas/WindhawkMod.schema.json",
+  "$id": "https://github.com/GabrielHoy/WindhawkUtilities/schemas/WindhawkMod.schema.json",
   "title": "Windhawk mod metadata",
   "description": "The // ==WindhawkMod== block of a mod, as an editable file. scripts/wh-amalgamate.ps1 renders this back into // @key lines when it bundles. Field reference: https://github.com/ramensoftware/windhawk/wiki/Creating-a-new-mod",
   "type": "object",
