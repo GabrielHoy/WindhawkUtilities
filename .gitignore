@@ -6,3 +6,4 @@ build/.ipc/daemon.json
 build/.ipc/daemon.lock
 build/.ipc/*.log
 build/.ipc/*.done
+build/.ipc/*.req
