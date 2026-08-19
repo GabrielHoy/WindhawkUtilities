@@ -124,7 +124,9 @@ function Invoke-WhModHook {
         $pwshArgs += [string]$Parameters[$key]
     }
 
-    Write-Host "==> hook $Name -> $([IO.Path]::GetRelativePath($ModDir, $hook).Replace('\','/'))" `
+    Write-Host "==> " -NoNewline -ForegroundColor DarkCyan
+    Write-Host "hook" -NoNewline -ForegroundColor DarkMagenta
+    Write-Host " $Name -> $([IO.Path]::GetRelativePath($ModDir, $hook).Replace('\','/'))" `
                -ForegroundColor DarkCyan
 
     # The pwsh currently running, which need not be the one on PATH -- editor
